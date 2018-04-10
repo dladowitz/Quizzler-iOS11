@@ -22,10 +22,9 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         scoreTotalLabel.text = "0"
         progressLabel.text = "0"
-        let firstQuestion = allQuestions.list[questionNumber]
-        questionLabel.text = firstQuestion.questionText
-    }
 
+        nextQuestion()
+    }
 
     @IBAction func answerPressed(_ sender: AnyObject) {
         let currentQuestion = allQuestions.list[questionNumber]
@@ -33,8 +32,7 @@ class ViewController: UIViewController {
 
         checkAnswer(question: currentQuestion, givenAnswer: givenAnswer)
     }
-    
-    
+
     func updateUI(correctAnswer: Bool) {
         var score = Int(scoreTotalLabel.text!)
         var progress = Int(progressLabel.text!)
@@ -42,22 +40,38 @@ class ViewController: UIViewController {
         if correctAnswer {
             score = score! + 1
             scoreTotalLabel.text = String(score!)
+            ProgressHUD.showSuccess("Correct")
+        } else {
+            ProgressHUD.showError("Wrong")
         }
+
 
         progress = progress! + 1
         progressLabel.text = String(progress!)
 
-        if progress == 13 {
-            startOver()
-        } else {
+        progressBar.frame.size.width = (view.frame.size.width / 13) * CGFloat(progress!)
+
+        if progress! <= 12 {
             nextQuestion()
+        } else {
+            // UIAlert Controller is a popup
+            // Instead of modal can have sheet from bottom with: preferredStyle: .actionSheet
+            let alert  = UIAlertController(title: "End of Quiz", message: "Start Over?", preferredStyle: .alert)
+
+            // UIAlertAction adds buttons
+            let restartAction = UIAlertAction(title: "Restart", style: .default) { (UIAlertAction) in
+                self.startOver()
+            }
+
+            // Need to add UIAlertAction to UIAlert for buttons to show on popup
+            alert.addAction(restartAction)
+            present(alert, animated: true, completion: nil)
         }
     }
 
     func nextQuestion() {
         questionNumber = Int(arc4random_uniform(10))
-        let nextQuestion = allQuestions.list[questionNumber]
-        questionLabel.text = nextQuestion.questionText
+        questionLabel.text = allQuestions.list[questionNumber].questionText
     }
     
     
